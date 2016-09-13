@@ -24,6 +24,7 @@ Right now the bot uses the following comment scheme:
 
 "
 "Comment from original top comment."
+
 ~ /u/reddit user
 "
 
