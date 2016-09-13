@@ -25,7 +25,6 @@ Right now the bot uses the following comment scheme:
 "Comment from original top comment."
 
 ~ /u/reddit user
-"
 
 With the file "illegalPhrases.txt" i'll filter out all the phrases that I don't want to see in a comment. It's a bad practice to post deleted comments for example so i'll filter out those. If the highest comment comes from a deleted account i'll filter that also since there is no way to credit the OP.
 
