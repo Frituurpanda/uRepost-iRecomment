@@ -22,7 +22,6 @@ Since i'm not trying to steal comments the bot refers back to the original comme
 ###Comment setup
 Right now the bot uses the following comment scheme:
 
-"
 "Comment from original top comment."
 
 ~ /u/reddit user
