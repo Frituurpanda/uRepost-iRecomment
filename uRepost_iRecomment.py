@@ -39,6 +39,7 @@ def CallKdapi(SearchUrl):
 
 def Main():
     print("-------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------")
     print(time.strftime('%X')+": Started Main(): " + OAuthTokenRequest.printdebuglines())
     print("-------------------------------------------------------------------------------------------------")
     user_agent = 'Post Smart Comments see uri for the source'
@@ -50,6 +51,7 @@ def Main():
 
     # Removing all posts that are downvoted below 1point
     removeDownvotedPosts(r)
+
     # checking the checkDB in MongoDB. Refreshing when needed.
     lastidlist, lastids = initialLastidSetup(db)
     # returns random subreddit from the allowedSubreddits.txt
@@ -93,46 +95,60 @@ def Main():
             continue
 
         nextlastid = vars(post)['id']
-        duplicate = 0
         submission = r.get_submission(submission_id=SubmissionID)
         submissionPoster = submission.author
         CommentList = submission.comments
+
+        # Printing info about the original comment
         print ("Using top comment from submission: " +
                "https://reddit.com/r/funny/"+ SubmissionID+
-               "Posted by redditor: " + "/u/"+str(CommentList[0].author))
+               " Posted by redditor: " + "/u/"+str(CommentList[0].author))
+        submissionCreatedUnixTime = float("{0:.2f}".format(((float(time.time()) - CommentList[0].created_utc)/60/60/24 )))
+        print "Original submission is " + str(submissionCreatedUnixTime) + " days old"
 
+        # Building the comment that the bot will post
         TopComment = CommentList[0].body
         TopComment += '\n'
         TopComment += '\n'
         TopComment += "~ ["+str(CommentList[0].author) + "]("+CommentList[0].permalink+")"
 
-        # Should make something with this to filter out submissions that are older than 6hours
         submission2 = r.get_submission(submission_id=nextlastid)
         submission2.replace_more_comments(limit=16, threshold=10)
         flat_comments = praw.helpers.flatten_tree(submission2.comments)
 
-        print("---------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------------------")
+        print("Setting up comment: ")
         print(TopComment)
-        print("---------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------------------")
 
-        # Simple function to filter out bad phrases before posting the comment.
-        lines = open('illegalPhrases.txt').read().splitlines()
+        state = 0
+        for comment in flat_comments:
+            if comment.body == TopComment:
+                state = 1
+        if state == 1:
+            continue
+        # Filter out bad phrases before posting the comment.
+        lines = open('util/illegalPhrases.txt').read().splitlines()
         for word in lines:
             if word in TopComment:
                 print "Found the word " + word
-                duplicate = 2
-
-        for comment in flat_comments:
-            if comment.body == TopComment:
-                duplicate = 1
-        if duplicate == 1:
-            continue
-        if duplicate == 2:
-            print "Discarded comment: phrase found in illegalPhrases.txt"
+                state = 2
+        # Break based on illegal phrases
+        if state == 2:
+            print("DISCARDED COMMENT:")
+            print "phrase found in illegalPhrases.txt"
+            break
+        # Break based on time
+        if (int(time.time()) - post.created_utc) >= 10800:
+            print("DISCARDED COMMENT: ")
+            postCreatedUnixTime = float("{0:.2f}".format(((float(time.time()) - float(post.created_utc))/60)/60))
+            print "Post " + str(postCreatedUnixTime) + " hours old"
             break
         try:
             post.add_comment(TopComment)
             post.upvote()
+            # Sleep to keep it posting evey every 5secs
+            delayAfterPost(300, 900)
         except praw.errors.APIException as PrawError:
             lastids.remove(postkey)
             print PrawError
@@ -147,16 +163,11 @@ def Main():
     NotInUseValue = {"value": 0}
     db.InUse.insert_one(NotInUseValue)
 
-    # Sleep to keep it posting evey every 5secs
-    delayAfterPost(300,500)
-
-
 def grabRandomSubreddit(r):
-    lines = open('allowedSubreddits.txt').read().splitlines()
+    lines = open('util/allowedSubreddits.txt').read().splitlines()
     myline = random.choice(lines)
     subreddit = r.get_subreddit(myline)
     return myline, subreddit
-
 
 def initialLastidSetup(db):
     lastids = []
@@ -179,7 +190,7 @@ def initialLastidSetup(db):
 
 def delayAfterPost(low, high):
     sleepValue = random.randint(low, high)
-    print 'DELAY: ', sleepValue, 'seconds'
+    print 'Sleep for: ', sleepValue, 'seconds'
     time.sleep(sleepValue)
 
 def removeDownvotedPosts(r):
@@ -203,8 +214,7 @@ def finalDbCheckup():
             if RunElem['value'] == 1:
                 print "Can't run"
                 exit()
-
-finalDbCheckup()
+#finalDbCheckup()
 
 try:
     Main()

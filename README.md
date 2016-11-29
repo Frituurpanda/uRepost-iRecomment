@@ -11,8 +11,6 @@ Automated commenting bot on <a href="https://www.reddit.com" alt="Reddit">Reddit
 <img src="img/Example1.png" alt="Example1">
 ####Example 2
 <img src="img/Example2.png" alt="Example2">
-####Example 3 
-<img src="img/Example3.png" alt="Example3">
 
 ###Why???
 This was primarily an experimental project. I wanted to see how Reddit would react to reposted comments. The bot recieved 25k comment karma in 3 days. Later the bot got shadowbanned for repeat posting on loads of subreddits. It could use some refinement and probably a delay.
@@ -22,11 +20,14 @@ Since i'm not trying to steal comments the bot refers back to the original comme
 ###Comment setup
 Right now the bot uses the following comment scheme:
 
+```bash
 "Comment from original top comment."
-
 ~ /u/reddit user
+```
 
-With the file "illegalPhrases.txt" i'll filter out all the phrases that I don't want to see in a comment. It's a bad practice to post deleted comments for example so i'll filter out those. If the highest comment comes from a deleted account i'll filter that also since there is no way to credit the OP.
+With the file "illegalPhrases.txt" i'll filter out all the phrases that I don't want to see in a comment. For example it's a bad shitty thing to post comments that are deleted (often are topcomment) so i'll filter those. If the highest comment comes from a deleted account i'll filter that also since there is no way to credit the OP.
+
+Aside from that the script is also timing posts to recent ones. There is no point in posting a comment in a thread that is 20hours old.
 
 ###Working with Karma Decay
 I used kdapi as the base for my Karma Decay script. I fixed many issues with the webpage parsing. Karma Decay also blocked many US AWS ips, so I used a proxy.
