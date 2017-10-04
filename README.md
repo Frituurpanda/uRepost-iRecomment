@@ -8,7 +8,7 @@ Automated commenting bot on <a href="https://www.reddit.com" alt="Reddit">Reddit
 </ol>
 
 ### Example 1
-![First Image](/img/Example4.png)
+![First Image](img/Example4.png)
 
 ### Example 2
 ![Second Image](/img/Example5.png)
